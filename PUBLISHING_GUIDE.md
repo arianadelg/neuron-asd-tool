@@ -12,7 +12,7 @@ The workflow is: **develop on GitHub → connect Zenodo → publish a release �
 The GitHub account has already been set throughout the repository (`arianadelg`), so the
 URLs in `README.md`, `Neuron_ASD.ipynb` and `CITATION.cff` are ready to use. If the
 repository is ever moved to a different account or organization, search for
-`arianadelg/neuron-asd` and update it in those three files.
+`arianadelg/neuron-asd-tool` and update it in those three files.
 
 One placeholder remains, and it is filled in at the end of Part 2:
 
@@ -58,7 +58,7 @@ git init
 git add .
 git commit -m "Initial release of Neuron ASD v1.0.0"
 git branch -M main
-git remote add origin https://github.com/arianadelg/neuron-asd.git
+git remote add origin https://github.com/arianadelg/neuron-asd-tool.git
 git push -u origin main
 ```
 
@@ -133,7 +133,7 @@ The software now has a citable DOI.
 
 The data/code availability statement in the manuscript should point to the DOI rather than to GitHub alone: a repository can move or disappear, a DOI cannot. Suggested wording:
 
-> The Neuron ASD platform is openly available at https://github.com/arianadelg/neuron-asd and archived at Zenodo (DOI: 10.5281/zenodo.XXXXXXX). The user guide and synthetic example data are included in the repository.
+> The Neuron ASD platform is openly available at https://github.com/arianadelg/neuron-asd-tool and archived at Zenodo (DOI: 10.5281/zenodo.XXXXXXX). The user guide and synthetic example data are included in the repository.
 
 If the journal also asks about the evaluation data, note that all three EEG datasets are already public (Sheffield ORDA; OpenNeuro ds003775; OpenNeuro ds005385) and are cited in the article.
 
@@ -164,4 +164,4 @@ Almost always because the toggle was switched on *after* the release was created
 The file must be named exactly `CITATION.cff`, sit in the repository root, and be valid YAML. If it was edited by hand, check that indentation still uses spaces rather than tabs.
 
 **The Colab notebook fails at Step 1.**
-Usually the repository is still private, or the account/repository name in the installation URL does not match. Open the notebook on GitHub and check the two lines containing `github.com/arianadelg/neuron-asd`.
+Usually the repository is still private, or the account/repository name in the installation URL does not match. Open the notebook on GitHub and check the two lines containing `github.com/arianadelg/neuron-asd-tool`.
