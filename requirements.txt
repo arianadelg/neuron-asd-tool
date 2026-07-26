@@ -1,0 +1,8 @@
+mne>=1.5
+fooof>=1.0
+numpy>=1.23
+scipy>=1.9
+pandas>=1.5
+matplotlib>=3.6
+scikit-learn>=1.2
+tensorflow-cpu>=2.12

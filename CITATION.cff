@@ -1,0 +1,55 @@
+cff-version: 1.2.0
+message: "If you use Neuron ASD, please cite both the software (this file) and the accompanying paper."
+title: "Neuron ASD"
+abstract: >-
+  An open platform for exploring the predicted effects of receptor
+  agonist/inhibitor modulations toward a typically-developing profile
+  from EEG in autism. Neuron ASD places each subject on the
+  excitation/inhibition axis relative to a typically-developing
+  reference and reports the receptor modulation predicted to move that
+  subject's spectral profile toward the reference.
+type: software
+version: 1.1.0
+date-released: 2026-07-24
+license: MIT
+repository-code: "https://github.com/arianadelg/neuron-asd"
+url: "https://github.com/arianadelg/neuron-asd"
+keywords:
+  - autism spectrum disorder
+  - excitation-inhibition balance
+  - EEG
+  - aperiodic exponent
+  - neural mass model
+  - computational psychiatry
+  - in silico screening
+authors:
+  - family-names: Alvarado
+    given-names: "Ysaías J."
+    affiliation: "Instituto Venezolano de Investigaciones Científicas (IVIC), Centro de Biomedicina Molecular (CBM), Maracaibo, Venezuela"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"   # <- add if available
+  - family-names: Cardozo-Urdaneta
+    given-names: Arlene
+    affiliation: "Instituto Venezolano de Investigaciones Científicas (IVIC), Centro de Biomedicina Molecular (CBM), Maracaibo, Venezuela"
+  - family-names: Lossada
+    given-names: Carla
+    affiliation: "Instituto Venezolano de Investigaciones Científicas (IVIC), Centro de Biomedicina Molecular (CBM), Maracaibo, Venezuela"
+  - family-names: Quintero
+    given-names: Máximo
+    affiliation: "Servicio Autónomo Hospital Universitario de Maracaibo (SAHUM), Maracaibo, Venezuela"
+  - family-names: Delgado
+    given-names: Ariana
+    affiliation: "Instituto Venezolano de Investigaciones Científicas (IVIC), Centro de Biomedicina Molecular (CBM), Maracaibo, Venezuela"
+  - family-names: González-Paz
+    given-names: Lenin
+    affiliation: "Instituto Venezolano de Investigaciones Científicas (IVIC), Centro de Biomedicina Molecular (CBM), Maracaibo, Venezuela"
+
+# Once the paper is published, fill in the DOI/journal below and uncomment.
+# preferred-citation:
+#   type: article
+#   title: "Neuron ASD: an open platform for exploring the predicted effects of receptor agonist/inhibitor modulations toward a typically-developing profile from EEG in autism"
+#   journal: "JOURNAL NAME"
+#   year: 2026
+#   doi: "10.XXXX/XXXXXX"
+#   authors:
+#     - family-names: Alvarado
+#       given-names: "Ysaías J."
