@@ -15,7 +15,7 @@ Neuron ASD takes an autistic subject's resting-state EEG, places the subject on 
 
 Open the notebook in Google Colab and run the cells in order:
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/arianadelg/neuron-asd/blob/main/Neuron_ASD.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/arianadelg/neuron-asd-tool/blob/main/Neuron_ASD.ipynb)
 
 1. **Set up** — one cell installs everything and hides technical messages.
 2. **Provide a TD reference** — upload a `.zip` of real typically-developing recordings.
@@ -26,7 +26,7 @@ Open the notebook in Google Colab and run the cells in order:
 ## Installation (for local or programmatic use)
 
 ```bash
-pip install git+https://github.com/arianadelg/neuron-asd.git
+pip install git+https://github.com/arianadelg/neuron-asd-tool.git
 ```
 
 ```python
