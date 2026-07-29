@@ -5,4 +5,7 @@ scipy>=1.9
 pandas>=1.5
 matplotlib>=3.6
 scikit-learn>=1.2
-tensorflow-cpu>=2.12
+# TensorFlow is optional (only for the CNN surrogate accelerator) and is intentionally
+# NOT listed here: Colab and most notebook runtimes already ship a working build, and
+# installing another on top corrupts it. If you need the accelerator on a bare machine:
+#   pip install tensorflow>=2.12

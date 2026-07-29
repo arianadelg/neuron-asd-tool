@@ -2,6 +2,6 @@
 from . import app, engine
 from .app import (build_reference, analyze_subject, analyze_folder,
                   show, reference_summary, Reference, SubjectResult)
-__version__ = "1.1.0"
+__version__ = "1.1.2"
 __all__ = ["app", "engine", "build_reference", "analyze_subject", "analyze_folder",
            "show", "reference_summary", "Reference", "SubjectResult"]

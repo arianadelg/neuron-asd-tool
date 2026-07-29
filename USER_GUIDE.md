@@ -1,160 +1,256 @@
-# Neuron ASD — User Guide
+# Neuron ASD — Interactive Explorer · User Guide
 
-This guide walks you through Neuron ASD from start to finish. No programming experience is needed. If you can upload a file and click a button, you can use the tool.
+An interactive Google Colab tool for the validated **Neuron ASD** methodology. For each autistic
+(ASD) subject you provide, it shows the **predicted effect** of receptor and neuromodulator
+modulations that move the subject's resting-EEG spectral profile toward a **typically-developing
+(TD)** reference.
 
----
+> **Model-based predictions for hypothesis generation — not clinical prescriptions.**
+> The aperiodic (1/f) read-out places each subject on the excitation/inhibition (E/I) axis
+> individually; it is not a group-level claim.
 
-## 1. What Neuron ASD does
-
-Neuron ASD looks at an autistic subject's resting-state EEG and answers two questions:
-
-1. **Where does this subject sit on the excitation/inhibition (E/I) axis**, compared with a typically-developing (TD) reference?
-2. **Which receptor modulation is predicted to move this subject's brain-activity profile toward the TD reference**, and by how much?
-
-It does this per subject, because autistic subjects differ from one another; the recommended modulation is often different for different people, and that is exactly what the tool is meant to reveal.
-
-**Important:** Neuron ASD is a research and hypothesis-generation tool. It produces predictions from a computational model, relative to a reference you supply. These are **not** medical advice or validated clinical prescriptions.
+**Repository:** <https://github.com/arianadelg/neuron-asd-tool> · **DOI:** `10.5281/zenodo.21581231`
 
 ---
 
-## 2. What you need before you start
+## Quick start
 
-### A typically-developing (TD) reference
-A set of resting-state, eyes-closed EEG recordings from typically-developing individuals, one file per person, packaged in a single `.zip` file.
+1. Open `Neuron_ASD_Colab_Explorer.ipynb` in Google Colab.
+2. Run the cells **in order** (each control is a native Colab form — sliders and dropdowns appear
+   to the right of the cell).
+3. After Steps 1–3, use **Step 4** to explore modulations as many times as you like — instantly.
 
-- **How many recordings?** About **20** for a reliable reference. The tool still runs with fewer, but it will warn you: with around 3 recordings, up to one-third of subjects can be placed on the wrong side of the E/I axis.
-- **Which group?** Ideally the **same cohort** (same site, same equipment, same population) as the subjects you will analyze. TD groups from other datasets are **not** interchangeable, even when the recording hardware matches.
-- **Can I use a simulated reference instead of real data?** No. A model-generated reference is not valid on the aperiodic axis and will produce meaningless, saturated results.
+The workflow:
 
-### Subject recordings
-Resting-state, eyes-closed EEG for each subject you want to analyze, one file per subject.
-
-### Supported file formats
-EEGLAB `.set` (with its `.fdt`), EDF `.edf`, BioSemi `.bdf`, BrainVision `.vhdr` (with `.eeg`/`.vmrk`), FIF `.fif`, and several others supported by MNE-Python. When a format uses sidecar files (like `.set`+`.fdt`), include **all** of them in the `.zip`.
-
----
-
-## 3. Using the Colab notebook (recommended)
-
-Colab runs everything in your browser; nothing is installed on your computer.
-
-### Step 1 — Set up
-Open `Neuron_ASD.ipynb` in Colab and run the first cell. It installs the required libraries, loads Neuron ASD, and prepares its response model.
-
-**Expect a few minutes on the first run.** Neuron ASD has to simulate the effect of every receptor modulation once before it can make recommendations. This result is deterministic, so it is saved: if you return to the notebook later, or analyze more subjects, it starts immediately. Technical messages are hidden, so the cell will look quiet while it works. Wait until it prints **"Neuron ASD is ready."**
-
-If you use Neuron ASD from your own Python code, you can trigger this step explicitly with `app.prepare()` — for example while you are still collecting your files — so the analyses themselves return without delay.
-
-### Step 2 — Provide the TD reference
-Run the Step 2 cell. A file picker appears; choose your TD `.zip`. Neuron ASD builds the reference and prints a summary, including a **reliability note** based on how many recordings you provided. Read that note — if it says the reference is small, treat individual classifications with caution.
-
-### Step 3 — Analyze one subject
-Run the Step 3 cell and choose one subject's EEG file. Neuron ASD prints:
-
-- the subject's **aperiodic exponent** and the quality of the fit,
-- the **E/I placement** (higher E/I, lower E/I, or typical),
-- the **recommended modulation** with its confidence,
-- the **predicted effect** (distance to TD before and after, and the gain in dB and %),
-
-and draws a two-panel figure: the predicted movement toward TD, and the subject's deviation from TD in each frequency band.
-
-### Step 4 — Analyze a whole group (optional)
-Run the Step 4 cell and upload a `.zip` of several subjects. Neuron ASD returns a table with one row per subject and offers it as a downloadable spreadsheet (`neuron_asd_results.csv`).
-
-### Step 5 — Built-in example
-No data yet? Run the Step 5 cell. It downloads a small synthetic example bundled with the repository and runs the full analysis so you can see the expected output.
-
----
-
-## 4. Using Neuron ASD in your own Python code
-
-```python
-from neuron_asd import app
-
-# 1. Build a TD reference from a folder, a .zip, or a list of files
-reference = app.build_reference("td_folder_or_zip")
-app.reference_summary(reference)
-
-# 2. Analyze one subject
-result = app.analyze_subject("subject.set", reference)
-app.show(result)                       # prints a summary and draws the figure
-
-# access individual fields
-print(result.ei_class, result.top_target, result.top_direction, result.gain_pct)
-
-# 3. Analyze a whole folder/zip at once -> pandas DataFrame
-table = app.analyze_folder("subjects_folder_or_zip", reference)
-table.to_csv("results.csv", index=False)
-```
-
-### Choosing the region of interest (advanced)
-By default, Neuron ASD derives a common central region of interest automatically (the vertex-cluster channels present in at least 85% of your files), exactly as in the paper. To force a specific set of channels, pass `roi=[...]` to `build_reference`. The same ROI is then used for every subject compared against that reference.
-
----
-
-## 5. Understanding the outputs
-
-| Field | What it means |
+| Step | Purpose |
 |---|---|
-| **Aperiodic exponent** | The slope of the 1/f part of the EEG spectrum. A steeper (larger) exponent indexes relatively stronger inhibition; a flatter (smaller) exponent, relatively stronger excitation. |
-| **Fit R²** | How well the spectral model fit the recording. Values close to 1 indicate a clean fit. |
-| **E/I placement** | "Higher E/I (flatter)", "lower E/I (steeper)", or "typical", relative to the TD reference and its noise floor. |
-| **Recommended move** | The receptor target and direction (Agonist / Inhibitor) predicted to move the subject toward TD. |
-| **Confidence** | How consistently that move was selected across the internal stability ensemble (0–1). |
-| **Distance before / after** | The subject's distance from the TD reference (over the five frequency bands, in dB) before and after the recommended modulation. |
-| **Predicted gain** | How much the modulation is predicted to reduce that distance, in dB and as a percentage. |
-| **Deviation by band** | How far the subject is from TD in each band (δ, θ, α, β, γ); this shows which bands drive the recommendation. |
-
-A note on interpretation: the aperiodic read-out is a **per-subject placement**, not a group diagnosis. Neuron ASD deliberately makes no group-level claim about the direction of the E/I ratio in autism. The distance-to-TD and the band-level attributions describe the behaviour of the model relative to your reference; they are not independently validated clinical biomarkers.
+| **1. Setup** | Install the validated engine (+ MNE for EEG reading). |
+| **2. Load EEG** | Upload ASD subjects (1, 3, or any number) and a TD pool. |
+| **3. Engine + TD reference** | Choose the engine and build the (cached) TD reference. |
+| **3b. Accelerator** *(optional)* | Train the CNN surrogate — only for large batches. |
+| **4. Modulate manually** | Set knobs → predicted effect + clinical-style note. Repeatable. |
+| **5. Recommendation** *(optional)* | The model's own best per-subject modulations. |
 
 ---
 
-## 6. Troubleshooting
+## Step 1 · Setup
 
-**"No EEG files found."**
-Your `.zip` may contain a folder inside a folder, or only sidecar files. Make sure the primary files (e.g. `.set`, `.edf`, `.vhdr`) are present, together with their sidecars.
+Run once. Installs the Neuron ASD package from the repository plus dependencies, including **MNE**
+(the library that reads EEG file formats).
 
-**"Fewer than 3 reference-ROI channels available."**
-The recording does not contain enough of the central channels used for the analysis. This happens when a montage is very different from the others. Check that channel names are standard 10–20 labels; Neuron ASD renames BioSemi A/B labels automatically, but highly non-standard names may not be recognized.
+**About TensorFlow:** this cell does **not** install TensorFlow. Colab ships a working build, and
+installing another on top corrupts the native libraries. The cell only checks whether TensorFlow is
+importable, because it is needed **only** by the optional accelerator (Step 3b).
 
-**A subject is skipped in the group table.**
-The reason is shown in the `E_I_class` column for that row (for example, a read error or too few ROI channels). Other subjects are unaffected.
-
-**The reference exponent looks wrong (e.g. negative, or very different from ~1.3).**
-Real resting EEG typically gives an aperiodic exponent around 1.3. A value far from that usually means the input is not real resting EEG (for example, a simulated file), or the recordings are very short or heavily filtered. Do not use a simulated reference.
-
-**The results change when I change the reference.**
-That is expected and important: every output is defined relative to the TD reference. Use a real, same-cohort reference of about 20 recordings for stable results, and do not swap in a TD group from another dataset.
-
-**The first analysis seems frozen.**
-The response model is being simulated; this happens once and takes a few minutes. Technical output is hidden, so the cell looks idle while it works. Later runs load the saved model and start immediately. If you want to see it happen explicitly, run `app.prepare()` first.
-
-**Everything ran but the figure did not appear.**
-In some environments figures render only when the cell finishes. Re-run the cell, or call `app.show(result)` again.
+*No adjustable parameters.*
 
 ---
 
-## 7. Optional realistic mode (research extension)
+## Step 2 · Load EEG (ASD subjects + TD pool)
 
-By default, Neuron ASD's simulator is driven by white noise and has a flat aperiodic spectrum. This is the behaviour used for every result in the paper. A known consequence is that the machine-learning surrogate, trained on that simulator, does not cover the 1/f regime of real EEG.
+Upload your recordings: **1, 3, or any number** of ASD subjects, and a **pool of TD** recordings
+that serves as the reference.
 
-The optional **realistic mode** addresses this. It applies a tissue filter — a 1/f^β transfer stage representing the dendritic filtering and volume conduction that shape the aperiodic slope of scalp EEG — to the model output, so the simulated EEG carries a realistic slope (β ≈ 1.7 gives a typically-developing exponent near 1.33) while preserving the E/I band structure. A surrogate retrained on this realistic engine (included as `models/surrogate_realistic_5k.keras`, R² ≈ 0.93) then operates in the real-EEG regime.
+**Accepted formats** (any the main tool reads, via MNE): EEGLAB `.set`(+`.fdt`), EDF `.edf`,
+BioSemi `.bdf`, `.gdf`, BrainVision `.vhdr`(+`.eeg`/`.vmrk`), MNE `.fif`, Neuroscan `.cnt`/`.cdt`,
+EGI `.mff`/`.raw`, plus `.npy`, `.csv`, `.txt`.
 
-```python
-from neuron_asd import app
+**Multi-file formats:** if your format uses several files (e.g. `.set` + `.fdt`), **select all parts
+together** in the upload dialog. They are saved to the same folder and MNE matches them automatically.
 
-app.enable_realistic_mode()      # tissue filter on (β = 1.7 by default)
-# ... build_reference / analyze_subject / analyze_folder as usual ...
-app.disable_realistic_mode()     # back to the default, paper-validated behaviour
-```
+**Processing:** each recording is conditioned with the same validated pipeline as the paper
+(resample to 200 Hz, filtering, notch, 120 s window, central region of interest).
 
-Two things to keep in mind: enabling realistic mode changes what the simulator produces, so the response model is rebuilt the first time you analyze after switching (a one-time wait). And with the filter **off** — the default — the simulator is bit-for-bit identical to the published engine, so nothing in the paper's results is affected. Realistic mode is a research extension and a proof of principle; the recommendations themselves are not yet validated on empirical outcomes.
+### Parameters
 
-## 8. Reproducibility and limits
+| Parameter | Default | What it is and how it varies |
+|---|---|---|
+| `reload_ASD_subjects` | `True` | When ticked, prompts you to upload ASD subjects. Untick to keep the ASD subjects already loaded. |
+| `reload_TD_pool` | `True` | The TD pool is the expensive part. Tick it the first time to upload it. **Afterwards, untick it** to keep the loaded TD pool while you change only the ASD subjects — this saves a lot of time. |
+| `TD_reference_source` | *Upload / keep a real TD pool* | `Upload / keep a real TD pool` uses real TD recordings (recommended). `Use the TD simulator (LEAST reliable)` uses the simulator as reference — the **least reliable** option, because the simulated reference is invalid on the aperiodic (1/f) axis. Use it only if you have no real TD data. |
 
-- Neuron ASD applies a fixed, published pipeline; the modelling engine is not meant to be modified if you want to reproduce the paper.
-- The neural-mass model is deliberately simple and does not capture detailed channel dynamics, plasticity, or cortical spatial structure.
-- The machine-learning surrogate included with the project is a fast **emulator of the simulator**; real EEG falls outside its training distribution, so it is not applied to real recordings in this interface.
-- Cross-dataset comparisons remain sensitive to site and montage differences despite the harmonization applied here.
+**TD pool size:** the paper found the E/I read-out stabilizes around **~20 real TD recordings**.
+With fewer, the tool warns you and results should be treated as provisional.
 
-For the full methods, reliability analyses, and the receptor→EEG map with references, see the accompanying paper and its supplementary material.
+---
+
+## Step 3 · Engine + build TD reference
+
+Run once after loading data. It does two things that make everything else fast: it builds the TD
+reference (the target profile) and pre-computes each subject's features. Both are **cached**, so
+Steps 4 and 5 are then instant and repeatable.
+
+**When to re-run:** only if you change the engine or reload data. Otherwise the cell detects the
+cached reference and reuses it without recomputing.
+
+### Parameter
+
+| Parameter | Default | What it is and how it varies |
+|---|---|---|
+| `engine_mode` | *Classic (paper-validated)* | `Classic` reproduces the paper exactly (validated results). `Realistic (tissue filter, extension)` adds the 1/f tissue filter — it brings the simulator into the real-EEG regime, useful mainly with the emulator. With Classic, the validated results are unchanged. |
+
+> **Which engine for real EEG?** Real EEG carries its own 1/f (aperiodic) physics. In **Realistic**,
+> the simulated TD reference and the modulation responses also carry that 1/f structure, so they live
+> on the **same physical scale** as your real recordings — the more coherent choice when comparing
+> against real EEG. In **Classic**, the simulated reference is aperiodically flat (the "invalid on the
+> aperiodic axis" finding of the paper), so distances mix two scales. Use **Classic** to reproduce the
+> paper's validated numbers; prefer **Realistic** when interpreting modulations against your own real
+> EEG. The choice is yours — the tool prints a note reminding you which regime you're in.
+
+On completion it prints the TD reference band profile (dB) and, for a real pool, its aperiodic
+exponent, plus which subjects are ready.
+
+---
+
+## Step 3b · Accelerator (surrogate emulator) — optional
+
+**What it is:** a convolutional neural network (CNN) that **emulates** the simulator, roughly 2×
+faster per evaluation.
+
+**When to use it:** only if you plan **many** evaluations (large batches, parameter sweeps, or the
+paper's AI component). **For interactive use with a few subjects you do not need it** — the direct
+simulator in Steps 4–5 is fast enough and more accurate. The cell is placed *before* the evaluations
+on purpose: if you do train it, later steps can use it.
+
+**Robustness:** training generates data in **resumable blocks**, so a Colab restart never loses more
+than one block. Fidelity scales with the number of samples (in the paper, R² ≈ 0.93 at 5000 samples
+on the realistic engine).
+
+### Parameters
+
+| Parameter | Default | Range | What it is and how it varies |
+|---|---|---|---|
+| `run_training` | `False` | checkbox | Must be ticked to train. Off by default, since interactive use does not need the accelerator. |
+| `n_samples` | `1500` | 300–5000 | Number of training samples. More samples = higher emulator fidelity, but more time. Reference: R²≈0.75 (700), 0.89 (1500), 0.93 (5000). |
+| `epochs` | `40` | 10–80 | Training epochs. More epochs refine the fit; too many can overfit. 40 is a balanced value. |
+
+---
+
+## Step 4 · Modulate manually → predicted effect
+
+The interactive core. Choose a subject, set the modulations, and run. **Repeat as many times as you
+like** — change any control and re-run; it's instant because the TD reference is cached.
+
+**Coherence with Step 5:** modulations are translated exactly as in the paper (each receptor with
+its own sign and magnitude), so the effect you see here matches the Step-5 recommendations.
+
+### Subject and seed
+
+| Parameter | Default | What it is and how it varies |
+|---|---|---|
+| `subject` | `ALL (cohort average)` | Type an ASD subject name (as in Step 2) to view it individually, or leave `ALL (cohort average)` for the cohort mean. |
+| `seed` | `42` (1–200) | Random seed of the simulation. Changing it shows run-to-run variability. It does not change the modulation, only that run's stochastic noise. |
+
+### Receptor modulations
+
+Each of the 8 receptors has three options: **None** (no modulation), **Agonist** (+) or
+**Inhibitor** (−). The default for all is **None**.
+
+> **Important:** "Agonist" does not always mean a positive value in the model. Each receptor has its
+> own pharmacological sign and magnitude. For example, a **5HT2A** agonist maps to a **negative**
+> model value. The tool applies these signs automatically — the same way Step 5 does.
+
+| Receptor | Agonist → model value | Notes |
+|---|---|---|
+| GABA_A | +0.30 | Direct sign |
+| GABA_B | +0.30 | Direct sign |
+| NMDA (NR2A) | +0.30 | Direct sign |
+| NMDA (NR2B) | +0.20 | Smaller magnitude |
+| AMPA | +0.30 | Direct sign |
+| D2_dopamine | +0.20 | Smaller magnitude |
+| 5HT2A | −0.30 | Inverted sign (agonist = negative value) |
+| alpha7_nAChR | +0.30 | Direct sign |
+
+An inhibitor produces the value with the opposite sign to the table.
+
+### Global neuromodulators
+
+| Parameter | Default | Range | What it is |
+|---|---|---|---|
+| `dopamine` | `0.0` | −1 … +1 | Global dopamine level. Continuous slider (step 0.05). |
+| `serotonin` | `0.0` | −1 … +1 | Global serotonin level. |
+| `norepinephrine` | `0.0` | −1 … +1 | Global norepinephrine level. |
+
+### What the result shows
+
+- **Spectral profile:** bars for the subject, the post-modulation profile, and the TD reference,
+  across the 5 bands (δ, θ, α, β, γ).
+- **Distance to TD:** before and after the modulation. A decrease means moving toward TD (an
+  improvement); the title reports the change in dB and percent.
+- **E/I placement:** the subject, the modulated profile, and the reference on the aperiodic-exponent
+  axis (steeper = lower E/I).
+- **Clinical-style note:** a short printed text (not a file) summarizing the subject's baseline, the
+  applied modulation, the predicted effect, and an interpretation hint.
+
+---
+
+## Step 5 · Per-subject recommendation (optional)
+
+For each subject, the tool suggests the modulations the model itself predicts as best for moving the
+subject toward TD, using the validated **response-projection** method.
+
+**On timing:** the first run builds a "response ensemble" (~3–4 minutes). It is then cached, so
+subsequent runs — including changing the subject — are fast.
+
+### Parameters
+
+| Parameter | Default | Range | What it is and how it varies |
+|---|---|---|---|
+| `which_subject` | `ALL subjects` | text | `ALL subjects` to process all, or a specific subject name from Step 2. |
+| `top_k` | `4` | 1–8 | Maximum number of modulations the algorithm considers when projecting the subject's deviation — how many "moves" the greedy projection chains to cancel the gap to TD. Raising it allows longer combinations; lowering it restricts to the most dominant. It does **not** force that many to be shown: only moves above the confidence threshold are reported. |
+
+### How to read the recommendation (and confidence)
+
+The method is **stability selection**: the projection is repeated over a set of stable reference
+baselines (3) combined with several seeds (8), and a move is reported with a **confidence** equal to
+the fraction of the ensemble in which it was selected.
+
+> **Reliability filter:** the tool reports only moves with confidence **≥ 60%**. This matters:
+> low-confidence moves are selected only *in combination* with others and, applied in isolation in
+> Step 4, may produce a contrary effect. By reporting only the ≥ 60% moves, what Step 5 recommends is
+> guaranteed to be reproducible when applied manually in Step 4.
+
+A per-subject clinical-style note summarizes the strongest reliable hypothesis and its confidence.
+
+---
+
+## Internal method values (not adjustable in the interface)
+
+Fixed in the validated engine; useful to know when interpreting results:
+
+| Constant | Value | Meaning |
+|---|---|---|
+| Stability threshold | 0.60 (60%) | Minimum confidence to report a modulation in Step 5. |
+| Noise gate | 0.40 dB | Ignores gains below the response noise floor; avoids reporting trivial effects. |
+| Reference baselines | 3 | Stable terrains on which each modulation's response is measured. |
+| Response seeds | 8 | Stochastic seeds per baseline; the full ensemble is 3 × 8 = 24. |
+| Sampling rate | 200 Hz | The EEG is resampled to this rate during conditioning. |
+| Bands | δ, θ, α, β, γ | The five bands defining the spectral profile. |
+
+---
+
+## Troubleshooting
+
+- **Widgets / controls don't appear.** The Explorer uses native Colab forms, not ipywidgets, so
+  controls always render. If a form looks blank, re-run the cell.
+- **TensorFlow `undefined symbol` error (only if you use Step 3b).** Your Colab session's
+  TensorFlow was corrupted by a previous install of a different TensorFlow on top of Colab's build.
+  Fix it with **Runtime → Restart session** (or *Disconnect and delete runtime*), then run the cells
+  again from Step 1. Do **not** pip-install TensorFlow. As of v1.1.2 the package no longer lists
+  TensorFlow as a dependency, so a fresh install does not trigger this. You do not need the
+  accelerator for interactive use — Steps 4–5 work without it.
+- **A `.set` file fails to load.** Make sure you selected its `.fdt` sidecar in the same upload.
+- **Step 5 is slow the first time.** It builds the response ensemble once (~3–4 min); later runs are
+  cached and fast.
+
+---
+
+## Citation
+
+If you use this tool, please cite the repository via its DOI:
+
+> Neuron ASD — an open, interactive platform for per-subject exploration of receptor modulations
+> toward a typically-developing EEG reference in autism. DOI: `10.5281/zenodo.21581231`.
+
+All outputs are **model-based predictions for hypothesis generation in research and education**.
+They are not clinical advice or prescriptions.

@@ -1,29 +1,38 @@
-# Neuron ASD
+# 🧠 Neuron ASD
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21581231.svg)](https://doi.org/10.5281/zenodo.21581231)
+[![Open the Explorer in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/arianadelg/neuron-asd-tool/blob/main/Neuron_ASD_Colab_Explorer.ipynb)
 
-**An open platform for exploring the predicted effects of receptor agonist/inhibitor modulations toward a typically-developing (TD) profile from EEG in autism.**
+**An open, interactive platform for exploring the predicted effects of receptor and neuromodulator modulations toward a typically-developing (TD) profile from EEG in autism.**
 
-Neuron ASD takes an autistic subject's resting-state EEG, places the subject on the excitation/inhibition (E/I) axis relative to a TD reference, and reports the receptor modulation predicted to move that subject's spectral profile toward TD. It is built around a three-population neural-mass model and an aperiodic (1/f) read-out, with a friendly interface intended for non-programmers.
+Neuron ASD takes an autistic subject's resting-state EEG, places the subject on the excitation/inhibition (E/I) axis relative to a TD reference, and shows the modulations predicted to move that subject's spectral profile toward TD. It is built around a three-population neural-mass model and an aperiodic (1/f) read-out, with a friendly interface intended for non-programmers.
 
 > **Scope.** Neuron ASD is a research and hypothesis-generation tool. Its outputs are model-based predictions relative to a reference, **not** validated clinical prescriptions.
 
 ---
 
-## Quick start (no installation)
+## 🚀 Start here — the Interactive Explorer
 
-Open the notebook in Google Colab and run the cells in order:
+The easiest way to use Neuron ASD. A fully **Colab-native** tool (native form controls — sliders and dropdowns, no setup headaches): load your EEG, move the knobs, and see the predicted effect of each modulation.
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/arianadelg/neuron-asd-tool/blob/main/Neuron_ASD.ipynb)
+### ▶️ [**Open the Interactive Explorer in Colab**](https://colab.research.google.com/github/arianadelg/neuron-asd-tool/blob/main/Neuron_ASD_Colab_Explorer.ipynb)
 
-1. **Set up** — one cell installs everything and hides technical messages.
-2. **Provide a TD reference** — upload a `.zip` of real typically-developing recordings.
-3. **Analyze a subject** — upload one EEG file and see the E/I placement, the recommended modulation, and the predicted effect toward TD.
-4. **Analyze a group** (optional) — upload a `.zip` and download a results table.
-5. **Built-in example** — run the bundled synthetic data if you just want to see it work.
+What you can do in it:
 
-## Installation (for local or programmatic use)
+- 📂 **Load any EEG format** — EEGLAB `.set`(+`.fdt`), EDF, BioSemi `.bdf`, BrainVision, FIF, and more (via MNE). Upload 1, 3, or any number of ASD subjects plus a TD pool.
+- 🔬 **Modulate manually** — set each of the 8 receptors as agonist/inhibitor and the 3 neuromodulators with sliders, then see the predicted spectral effect, the distance to TD, the E/I shift, and a short clinical-style note.
+- 🎯 **Get per-subject recommendations** — the model's own best, reliability-filtered modulation suggestions.
+- ⚙️ **Choose the engine** — *Classic* (paper-validated) or *Realistic* (1/f tissue-filter extension, the coherent choice for real EEG).
+- ⚡ **Optional accelerator** — train a fast CNN surrogate only if you need large batches.
+
+Once your data is loaded, you can explore modulations **as many times as you like, instantly** — the TD reference and subject features are cached. See **[`USER_GUIDE.md`](USER_GUIDE.md)** for a full walkthrough of every step and parameter.
+
+---
+
+## 🧑‍💻 Programmatic use (Python API)
+
+For scripting or integrating into your own pipeline:
 
 ```bash
 pip install git+https://github.com/arianadelg/neuron-asd-tool.git
@@ -32,12 +41,16 @@ pip install git+https://github.com/arianadelg/neuron-asd-tool.git
 ```python
 from neuron_asd import app
 
-reference = app.build_reference("td_recordings.zip")     # real TD group
-result    = app.analyze_subject("subject.set", reference) # one autistic subject
-app.show(result)                                          # summary + figure
+reference = app.build_reference("td_recordings.zip")      # real TD group
+result    = app.analyze_subject("subject.set", reference)  # one autistic subject
+app.show(result)                                           # summary + figure
 
-table = app.analyze_folder("subjects.zip", reference)     # a whole group -> DataFrame
+table = app.analyze_folder("subjects.zip", reference)      # a whole group -> DataFrame
 ```
+
+There is also a classic, guided notebook: [`Neuron_ASD.ipynb`](Neuron_ASD.ipynb).
+
+---
 
 ## What you need
 
@@ -51,20 +64,23 @@ Supported formats (via [MNE-Python](https://mne.tools)): EEGLAB `.set`, EDF `.ed
 | Output | Meaning |
 |---|---|
 | **E/I placement** | Where the subject sits on the excitation/inhibition axis (aperiodic 1/f exponent) relative to the TD reference. |
-| **Recommended move** | The receptor agonist/inhibitor modulation predicted to move the subject's band profile toward TD, with a confidence. |
-| **Predicted gain** | How far (in dB and %) the recommended modulation is predicted to reduce the distance to TD. |
+| **Predicted effect** | For a chosen modulation: how the spectral profile moves and how far (in dB and %) it reduces the distance to TD. |
+| **Recommended move** | The receptor agonist/inhibitor modulation predicted to move the subject toward TD, with a confidence (reliability-filtered). |
 
-## Optional realistic mode (research extension)
+## Classic vs Realistic engine
 
-By default the simulator has a flat aperiodic spectrum (the paper-validated behaviour). An optional realistic mode applies a 1/f tissue filter so the simulated EEG carries a realistic aperiodic slope, and a surrogate retrained on it (`models/surrogate_realistic_5k.keras`, R² ≈ 0.93) operates in the real-EEG regime:
+By default the simulator has a flat aperiodic spectrum (the paper-validated behaviour). An optional **realistic mode** applies a 1/f tissue filter so the simulated EEG carries a realistic aperiodic slope, and a surrogate retrained on it (`models/surrogate_realistic_5k.keras`, R² ≈ 0.93) operates in the real-EEG regime.
+
+- Use **Classic** to reproduce the paper's validated numbers. With the filter off (the default), the engine is bit-for-bit identical to the published version.
+- Prefer **Realistic** when interpreting modulations against your own **real EEG**, because the simulated reference then lives on the same 1/f physical scale as real recordings.
+
+In the Python API:
 
 ```python
 app.enable_realistic_mode()      # tissue filter on
 # ... analyze as usual ...
 app.disable_realistic_mode()     # restore default, paper-validated behaviour
 ```
-
-With the filter off (the default), the engine is bit-for-bit identical to the published version, so the paper's results are unaffected. See `USER_GUIDE.md` for details.
 
 ## The analysis pipeline
 
@@ -73,18 +89,19 @@ Neuron ASD applies the exact pipeline described in the paper: resampling to 200 
 ## Repository contents
 
 ```
-neuron-asd/
-├── Neuron_ASD.ipynb        # friendly Colab notebook (start here)
+neuron-asd-tool/
+├── Neuron_ASD_Colab_Explorer.ipynb   # interactive Explorer (start here)
+├── Neuron_ASD.ipynb                  # classic guided notebook
 ├── neuron_asd/
-│   ├── app.py              # user-facing interface (build_reference, analyze_subject, ...)
-│   ├── engine.py           # modelling engine (do not modify to reproduce the paper)
+│   ├── app.py                        # user-facing interface (build_reference, analyze_subject, ...)
+│   ├── engine.py                     # modelling engine (do not modify to reproduce the paper)
 │   └── __init__.py
-├── models/                 # retrained surrogate for the optional realistic mode
-├── examples/               # small synthetic example bundles (TD and subjects)
-├── USER_GUIDE.md           # step-by-step guide with troubleshooting
-├── PUBLISHING_GUIDE.md     # maintainer notes: GitHub + Zenodo release workflow
-├── CITATION.cff            # machine-readable citation metadata
-├── .zenodo.json            # metadata used when Zenodo archives a release
+├── models/                           # retrained surrogate for the realistic mode
+├── examples/                         # small synthetic example bundles (TD and subjects)
+├── USER_GUIDE.md                     # step-by-step guide with troubleshooting
+├── PUBLISHING_GUIDE.md               # maintainer notes: GitHub + Zenodo release workflow
+├── CITATION.cff                      # machine-readable citation metadata
+├── .zenodo.json                      # metadata used when Zenodo archives a release
 ├── requirements.txt
 ├── setup.py
 └── LICENSE
@@ -92,15 +109,15 @@ neuron-asd/
 
 ## Reproducing the paper
 
-The published evaluation (reference stability, minimum-N, cross-dataset transferability, and the machine-learning surrogate) is in a separate evaluation notebook released with the paper. This repository provides the tool itself and the friendly interface for applying it to new data.
+The published evaluation (reference stability, minimum-N, cross-dataset transferability, and the machine-learning surrogate) is in a separate evaluation notebook released with the paper. This repository provides the tool itself and the interactive interface for applying it to new data.
 
 ## Citation
 
 If you use Neuron ASD, please cite **both** the software and the accompanying paper.
 
-**Software** (archived on Zenodo, one DOI per release):
+**Software** (archived on Zenodo; the concept DOI always resolves to the latest version):
 
-> Alvarado, Y. J., Cardozo-Urdaneta, A., Lossada, C., Quintero, M., Delgado, A., & González-Paz, L. (2026). *Neuron ASD* (Version 1.0.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.XXXXXXX
+> Alvarado, Y. J., Cardozo-Urdaneta, A., Lossada, C., Quintero, M., Delgado, A., & González-Paz, L. (2026). *Neuron ASD* [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.21581231
 
 **Paper**: details will be added on publication.
 

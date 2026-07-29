@@ -56,14 +56,33 @@ EEG_EXTS = ('.set', '.edf', '.bdf', '.gdf', '.vhdr', '.fif', '.fif.gz',
             '.cnt', '.cdt', '.dap', '.mff', '.raw', '.nxe', '.mefd')
 
 def ensure(pkg, imp=None):
-    """Import `imp`; if missing, try to pip-install `pkg`. Never hard-crash."""
+    """Import `imp`; if the package is genuinely absent, try to pip-install `pkg`.
+    If the package IS installed but fails to import (e.g. a corrupted native build, as can
+    happen with TensorFlow on hosted notebooks), do NOT try to reinstall — reinstalling over
+    an existing build tends to corrupt it further. Surface the real error instead so the user
+    can restart the runtime. Never hard-crash."""
+    import importlib, importlib.util
+    name = imp or pkg
+    top = name.split(".")[0]
     try:
-        __import__(imp or pkg)
+        __import__(name)
         return True
-    except ImportError:
+    except ImportError as first_err:
+        # Is the top-level package actually installed? If so, the failure is a load error,
+        # not a missing package — reinstalling would make it worse.
+        try:
+            already_installed = importlib.util.find_spec(top) is not None
+        except (ImportError, ValueError):
+            already_installed = False
+        if already_installed:
+            log.warning("'%s' is installed but failed to import (%s). Not reinstalling. "
+                        "If this is a hosted notebook, restart the runtime and re-run.",
+                        top, first_err)
+            return False
+        # genuinely missing -> install once
         try:
             subprocess.check_call([sys.executable, "-m", "pip", "install", "--quiet", pkg])
-            __import__(imp or pkg)
+            __import__(name)
             return True
         except Exception as e:
             log.warning("Could not auto-install '%s' (%s). Please run: pip install %s",
